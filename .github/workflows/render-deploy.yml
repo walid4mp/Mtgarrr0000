@@ -1,0 +1,39 @@
+name: نشر على Render
+
+# يعمل بعد نجاح الاختبارات على الفرع الرئيسي، ويطلب من Render إعادة النشر عبر Deploy Hook.
+# أضف السرّ RENDER_DEPLOY_HOOK في: GitHub > Settings > Secrets and variables > Actions
+# (قيمة السرّ هي الرابط الذي يعطيك إياه Render في صفحة الخدمة > Settings > Deploy Hook)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --no-audit --no-fund
+      - run: node --check server.js && node --check src/game.js
+      - run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: تنبيه إن لم يُضبط رابط Render
+        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        run: |
+          echo "::warning::لم يُضبط السرّ RENDER_DEPLOY_HOOK — سيتخطى النشر. أضفه من إعدادات المستودع."
+      - name: طلب إعادة نشر Render
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: |
+          echo "إرسال طلب النشر إلى Render..."
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" -o /dev/null -w "HTTP %{http_code}\n"
+      - name: النتيجة
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: echo "تم إرسال طلب النشر بنجاح ✅"

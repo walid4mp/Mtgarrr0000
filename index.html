@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>TRUCK LOADER — لعبة اللودر المغناطيسي</title>
+<meta name="description" content="Truck Loader: لعبة ألغاز فيزيائية على المتصفح — 24 مستوى، لودر مغناطيسي، شاحنة، ومصاعد. تعمل على GitHub Pages و Render." />
+<meta name="theme-color" content="#1d2419" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="src/style.css" />
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+
+    <canvas id="game" width="960" height="540" aria-label="ساحة اللعب"></canvas>
+
+    <!-- ===== واجهة اللعب (HUD) ===== -->
+    <div id="hud" class="hud hidden">
+      <!-- الشريط الجانبي الأيسر -->
+      <div class="side">
+        <button id="btnRestart" class="dial" title="إعادة المستوى" aria-label="إعادة المستوى">⟳</button>
+        <button id="btnGrid" class="dial" title="قائمة المستويات" aria-label="قائمة المستويات">▦</button>
+        <button id="btnMusic" class="dial on" title="الموسيقى" aria-label="الموسيقى">♪</button>
+        <button id="btnSound" class="dial on" title="المؤثرات الصوتية" aria-label="المؤثرات الصوتية">🔊</button>
+      </div>
+
+      <!-- الزاوية العلوية اليمنى -->
+      <div class="topright">
+        <div class="timerbox"><span id="timer">0000</span></div>
+        <div class="starsbox" id="hudStars">
+          <i class="st"></i><i class="st"></i><i class="st"></i>
+        </div>
+        <button id="btnPause" class="dial small" title="إيقاف مؤقت" aria-label="إيقاف مؤقت">❚❚</button>
+      </div>
+
+      <button id="btnSkip" class="skip" title="تخطي المستوى">تخطي<span>SKIP</span></button>
+
+      <!-- عنوان المستوى داخل الملعب -->
+      <div class="leveltag" id="levelTag">
+        <b id="levelNum">LEVEL 01</b>
+        <span id="levelName">التدريب</span>
+      </div>
+
+      <!-- التلميح -->
+      <div class="hint hidden" id="hintEl"></div>
+
+      <!-- أزرار التحكم -->
+      <div class="pad">
+        <div class="move">
+          <button id="btnLeft"  class="tri left"  aria-label="يسار">◀</button>
+          <button id="btnRight" class="tri right" aria-label="يمين">▶</button>
+        </div>
+        <div class="act">
+          <button id="btnArmUp"   class="tri up"   aria-label="رفع الذراع">▲</button>
+          <button id="btnArmDown" class="tri down" aria-label="خفض الذراع">▼</button>
+          <button id="btnMagnet"  class="round" aria-label="المغناطيس">◉</button>
+        </div>
+      </div>
+
+      <div class="goalbox" id="goalBox">الصناديق: <b>0</b> / <span id="goalTotal">3</span></div>
+    </div>
+
+    <!-- ===== شاشة التحميل ===== -->
+    <section id="scrLoading" class="screen show">
+      <div class="logo">
+        <div class="logo-art"><img src="assets/logo.svg" class="logoimg" alt="Truck Loader" /></div>
+        <h1 class="logotext">TRUCK<span>LOADER</span></h1>
+        <div class="logo-star">★</div>
+      </div>
+      <div class="pct" id="loadPct">0%</div>
+      <div class="loadbar"><i id="loadFill"></i></div>
+    </section>
+
+    <!-- ===== الشاشة الرئيسية ===== -->
+    <section id="scrTitle" class="screen">
+      <div class="logo">
+        <div class="logo-art"><img src="assets/logo.svg" class="logoimg" alt="Truck Loader" /></div>
+        <h1 class="logotext">TRUCK<span>LOADER</span></h1>
+        <div class="logo-star">★</div>
+      </div>
+      <div class="menubtns">
+        <button id="btnPlay" class="plate big">ابدأ اللعب</button>
+        <button id="btnChoose" class="plate">اختيار المستوى</button>
+        <button id="btnHow" class="plate">طريقة اللعب</button>
+      </div>
+      <p class="credit">لعبة ألغاز فيزيائية بالمغناطيس · 24 مستوى</p>
+    </section>
+
+    <!-- ===== اختيار المستوى ===== -->
+    <section id="scrLevels" class="screen">
+      <h2 class="total">TOTAL SCORE: <b id="totalScore">0000</b></h2>
+      <div class="grid" id="levelGrid"></div>
+      <div class="menubtns row">
+        <button id="btnBackTitle" class="plate">رجوع</button>
+        <button id="btnReset" class="plate danger">تصفير التقدّم</button>
+      </div>
+    </section>
+
+    <!-- ===== نهاية المستوى ===== -->
+    <section id="scrComplete" class="screen">
+      <h2 class="done" id="doneTitle">أحسنت! تم تحميل الشاحنة</h2>
+      <div class="starsbox big" id="doneStars"><i class="st"></i><i class="st"></i><i class="st"></i></div>
+      <div class="scorebox">
+        <div><span>وقت المستوى</span><b id="doneTime">00:00</b></div>
+        <div><span>نقاط المستوى</span><b id="doneScore">0</b></div>
+        <div><span>المجموع</span><b id="doneTotal">0</b></div>
+      </div>
+      <div class="menubtns row">
+        <button id="btnRetry" class="plate">إعادة</button>
+        <button id="btnNext" class="plate big">المستوى التالي</button>
+        <button id="btnMenu2" class="plate">القائمة</button>
+      </div>
+    </section>
+
+    <!-- ===== الإيقاف المؤقت ===== -->
+    <section id="scrPause" class="screen">
+      <h2 class="total">إيقاف مؤقت</h2>
+      <div class="menubtns">
+        <button id="btnResume" class="plate big">متابعة</button>
+        <button id="btnRestart2" class="plate">إعادة المستوى</button>
+        <button id="btnMenu3" class="plate">القائمة الرئيسية</button>
+      </div>
+    </section>
+
+    <!-- ===== طريقة اللعب ===== -->
+    <section id="scrHow" class="screen">
+      <h2 class="total">طريقة اللعب</h2>
+      <ul class="howlist">
+        <li><b>القيادة:</b> ◀ ▶ للتحرك يميناً ويساراً (أو ← → من الكيبورد).</li>
+        <li><b>الذراع:</b> ▲ ▼ لتدوير الذراع (أو <kbd>Q</kbd> / <kbd>E</kbd>).</li>
+        <li><b>المغناطيس:</b> زر ◉ لتشغيل/إطفاء المغناطيس (أو <kbd>مسافة</kbd>). قرّب المغناطيس من الصندوق ثم شغّله.</li>
+        <li><b>المصعد:</b> عند الوقوف فوق المصعد، ↑ ↓ لتحريكه بين الطوابق.</li>
+        <li><b>الهدف:</b> انقل كل الصناديق الخشبية إلى صندوق الشاحنة. عند امتلاء الشاحنة بكامل الصناديق يُفتح المستوى التالي.</li>
+        <li><b>النجوم:</b> أنجز المستوى بسرعة أكبر لتحصل على 3 نجوم ⭐⭐⭐.</li>
+      </ul>
+      <div class="menubtns row">
+        <button id="btnHowBack" class="plate big">فهمت، رجوع</button>
+      </div>
+    </section>
+
+    <!-- ===== النهاية ===== -->
+    <section id="scrFinal" class="screen">
+      <h2 class="done">🎉 أكملت الـ 24 مستوى!</h2>
+      <p class="total">المجموع النهائي: <b id="finalScore">0</b></p>
+      <div class="menubtns row">
+        <button id="btnFinalMenu" class="plate big">القائمة الرئيسية</button>
+        <button id="btnFinalLevels" class="plate">المستويات</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script type="module" src="src/game.js"></script>
+</body>
+</html>

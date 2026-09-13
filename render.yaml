@@ -1,0 +1,17 @@
+# Render Blueprint — نشر تلقائي للعبة Truck Loader
+# الاستخدام: ادفع هذا الملف إلى GitHub ثم من Render اختر New > Blueprint واختر المستودع.
+services:
+  - type: web
+    name: truck-loader
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install --no-audit --no-fund
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "10000"

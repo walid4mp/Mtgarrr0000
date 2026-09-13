@@ -1,0 +1,39 @@
+name: CI — فحص واختبار
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: تثبيت التبعيات
+        run: npm install --no-audit --no-fund
+
+      - name: فحص صياغة ملفات الجافاسكربت
+        run: |
+          node --check server.js
+          node --check src/game.js
+          node --check src/art.js
+          node --check src/levels.js
+          node --check src/audio.js
+
+      - name: تشغيل الاختبارات
+        run: npm test
+
+      - name: التحقق من أن الخادم يستجيب
+        run: |
+          node server.js & SRV=$!
+          sleep 2
+          curl -fsS http://127.0.0.1:3000/healthz
+          curl -fsS http://127.0.0.1:3000/ | grep -q "TRUCK" && echo "index.html جاهز"
+          kill $SRV

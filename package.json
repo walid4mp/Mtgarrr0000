@@ -1,0 +1,27 @@
+{
+  "name": "truck-loader-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Truck Loader - لعبة ألغاز فيزيائية على المتصفح (24 مستوى، لودر مغناطيسي، شاحنة، مصعد)",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test/smoke.js",
+    "zip": "node scripts/package.js"
+  },
+  "keywords": [
+    "game",
+    "html5",
+    "canvas",
+    "physics",
+    "puzzle",
+    "truck-loader"
+  ],
+  "author": "Truck Loader Web",
+  "license": "MIT"
+}
