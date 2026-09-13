@@ -24,16 +24,18 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    env:
+      RENDER_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
     steps:
       - name: تنبيه إن لم يُضبط رابط Render
-        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        if: ${{ env.RENDER_HOOK == '' }}
         run: |
           echo "::warning::لم يُضبط السرّ RENDER_DEPLOY_HOOK — سيتخطى النشر. أضفه من إعدادات المستودع."
       - name: طلب إعادة نشر Render
-        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        if: ${{ env.RENDER_HOOK != '' }}
         run: |
           echo "إرسال طلب النشر إلى Render..."
           curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" -o /dev/null -w "HTTP %{http_code}\n"
       - name: النتيجة
-        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        if: ${{ env.RENDER_HOOK != '' }}
         run: echo "تم إرسال طلب النشر بنجاح ✅"
